@@ -1,0 +1,186 @@
+@page "/dicegame"
+@using Blazor.Extensions;
+<form>
+<h1>Wellcome To Dice Game</h1>        
+        @if(!isConnect) {
+            <div class="form-group row">
+                <label class="control-label" for="userName">User Name</label>
+                <div class="col-sm-10">
+                    <input type="text" id="userName" bind="@userName" />
+                    <input type="button" id="addList" value="Connect" class="btn btn-primary" onclick="@AddList"/>
+                </div>  
+            </div>
+        } 
+        else
+        {
+            <div class="form-group row">
+                <label class="control-label" for="playDice"><h3><font color="red">@userName</font></h3></label>
+                <div class="col-sm-10">                
+                  @if(!isplayAgain)
+                  {
+                     <input type="button" id="playDice" value="Play Dice" class="btn btn-primary" onclick="@PlayDice"/>   
+                  }
+                  else
+                  {
+                     <input type="button" id="playDice" value="Play Again" class="btn btn-primary" onclick="@PlayAgain"/>  
+                  }   
+                     @if(diceOne!=0)
+                     {
+                       <img src="/Images/@(diceOne).png" asp-append-version="true" width="50px" /> 
+                       <img src="/Images/@(diceTwo).png" asp-append-version="true" width="50px" /> 
+                       <label class="control-label"><h3>Score : @(diceOne+diceTwo)</h3></label>
+                    }                 
+                </div>      
+            </div>
+        }
+        @if(isConnectPlayer2)
+        {
+            <div class="form-group row">
+                <label class="control-label"><h3><font color="red">@userName2</font></h3></label>
+                <div class="col-sm-10">
+                    @if(diceThree!=0)
+                    {
+                        <img src="/Images/@(diceThree).png" asp-append-version="true" width="50px" /> 
+                        <img src="/Images/@(diceFour).png" asp-append-version="true" width="50px" /> 
+                        <label class="control-label"><h3>Score : @(diceThree+diceFour)</h3></label>
+                    }                                     
+                </div>      
+            </div>
+        }
+</form>
+@functions {
+    string connectionID;
+    string userName;
+    HubConnection connection;
+    bool isConnect=false;
+
+    bool isplayAgain=false;
+
+    string userName2;
+    string connectionID2;
+    bool isConnectPlayer2=false;
+    int diceThree=0;
+    int diceFour=0;
+
+   [Inject]
+   private HubConnectionBuilder _hubConnectionBuilder { get; set; }
+
+   @inject IJSRuntime jsRuntime
+
+    protected override async Task OnInitAsync()
+    {
+        connection = _hubConnectionBuilder
+            .WithUrl("http://localhost:1923/dicehub",
+            opt =>
+            {
+                opt.LogLevel = SignalRLogLevel.Trace; // Client log level
+                opt.Transport = HttpTransportType.WebSockets; // Which transport you want to use for this connection
+            })
+            .Build();
+
+        connection.On<string>("GetConnectionId", this.OnGetConnectionId);
+        connection.On<string,string>("FetchUser", this.OnFetchUser);
+        connection.On<string,int,int>("GetDice", this.OnGetDice);        
+        await connection.StartAsync();
+    }
+
+    Task OnGetConnectionId(string _connectionID)
+    {
+        System.Console.WriteLine("ConnectionID:" + _connectionID);
+        connectionID = _connectionID;
+        return Task.CompletedTask;
+    }
+
+    async Task AddList()
+    {
+         bool result = await connection.InvokeAsync<bool>("AddList", userName, connectionID);     
+         System.Console.WriteLine("User Add Result:" + result);   
+         if(result){             
+             isConnect=true;
+         }
+                  
+    }
+
+    async Task SenDice()
+    {
+         await connection.InvokeAsync("SenDice", connectionID2, userName, diceOne,diceTwo);   
+         await CalculateResult();  
+         System.Console.WriteLine("Dice Send");                              
+    }
+
+    Task OnFetchUser(string userName, string connectionID)
+    {
+       System.Console.WriteLine("Player2 Name:" + userName);
+       System.Console.WriteLine("Player2 ConnectionID:" + connectionID);
+       connectionID2 = connectionID;
+       userName2 = userName;
+       isConnectPlayer2=true;
+       StateHasChanged();
+       return Task.CompletedTask;
+    }
+
+    async Task OnGetDice(string userName, int _diceOne, int _diceTwo)
+    {
+        diceThree=_diceOne;
+        diceFour=_diceTwo;
+        
+        if(diceOne!=0 && diceTwo!=0 && diceThree!=0 && diceFour!=0)
+        {
+            isplayAgain=true;
+        }
+
+        StateHasChanged();                
+        
+        await CalculateResult();
+    }
+
+    async Task CalculateResult(){       
+        if(diceOne!=0 && diceTwo!=0 && diceThree!=0 && diceFour!=0)
+        {
+            if((diceOne+diceTwo)>(diceThree+diceFour))
+            {
+               System.Console.WriteLine("Winner:" + userName); 
+               await ShowAlert("Kazanan :"+userName);              
+            } 
+            else
+            {
+                System.Console.WriteLine("Winner:" + userName2); 
+                await ShowAlert("Kazanan :"+userName2);
+            }           
+        }
+    }
+    
+    int diceOne=0;
+    int diceTwo=0;
+    async Task PlayDice()
+    {
+        System.Random rnd= new Random();
+        diceOne=rnd.Next(1,7);
+        System.Threading.Thread.Sleep(1000);
+        diceTwo=rnd.Next(1,7);
+        StateHasChanged();
+        System.Console.WriteLine("Dice 1:" + diceOne);         
+        System.Console.WriteLine("Dice 2:" + diceTwo);  
+
+        if(diceOne!=0 && diceTwo!=0 && diceThree!=0 && diceFour!=0)
+        {
+            isplayAgain=true;            
+        }
+
+        await SenDice();       
+    }
+
+    void PlayAgain(){
+        isplayAgain=false;
+        diceOne=0;
+        diceTwo=0;
+        diceThree=0;
+        diceFour=0;
+        StateHasChanged();
+    }
+
+    private async Task ShowAlert(string message)
+    {
+         var result = await jsRuntime.InvokeAsync<object>("ShowAlert", message);        
+    }
+}

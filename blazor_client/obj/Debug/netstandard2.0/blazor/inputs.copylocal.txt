@@ -1,0 +1,10 @@
+/Users/borakasmer/.nuget/packages/blazor.extensions.signalr/0.1.9/lib/netstandard2.0/Blazor.Extensions.SignalR.JS.dll
+/Users/borakasmer/.nuget/packages/blazor.extensions.signalr/0.1.9/lib/netstandard2.0/Blazor.Extensions.SignalR.dll
+/Users/borakasmer/.nuget/packages/microsoft.aspnetcore.blazor/3.0.0-preview5-19227-01/lib/netstandard2.0/Microsoft.AspNetCore.Blazor.dll
+/Users/borakasmer/.nuget/packages/microsoft.aspnetcore.components/3.0.0-preview5-19227-01/lib/netstandard2.0/Microsoft.AspNetCore.Components.dll
+/Users/borakasmer/.nuget/packages/microsoft.aspnetcore.components.browser/3.0.0-preview5-19227-01/lib/netstandard2.0/Microsoft.AspNetCore.Components.Browser.dll
+/Users/borakasmer/.nuget/packages/microsoft.extensions.dependencyinjection/3.0.0-preview5.19227.9/lib/netstandard2.0/Microsoft.Extensions.DependencyInjection.dll
+/Users/borakasmer/.nuget/packages/microsoft.extensions.dependencyinjection.abstractions/3.0.0-preview5.19227.9/lib/netstandard2.0/Microsoft.Extensions.DependencyInjection.Abstractions.dll
+/Users/borakasmer/.nuget/packages/microsoft.jsinterop/3.0.0-preview5.19227.9/lib/netstandard2.0/Microsoft.JSInterop.dll
+/Users/borakasmer/.nuget/packages/mono.webassembly.interop/3.0.0-preview5.19227.9/lib/netstandard2.0/Mono.WebAssembly.Interop.dll
+/Users/borakasmer/.nuget/packages/system.componentmodel.annotations/4.6.0-preview5.19224.8/lib/netstandard2.0/System.ComponentModel.Annotations.dll
